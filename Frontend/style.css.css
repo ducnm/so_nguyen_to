@@ -1,0 +1,93 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 30px;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-size: 28px;
+}
+
+.input-group {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+#numberInput {
+  flex: 1;
+  padding: 14px 20px;
+  border: 2px solid #ddd;
+  border-radius: 50px 0 0 50px;
+  font-size: 18px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+#numberInput:focus {
+  border-color: #3498db;
+}
+
+#checkBtn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0 30px;
+  border-radius: 0 50px 50px 0;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+#checkBtn:hover {
+  background: #2980b9;
+}
+
+.result {
+  min-height: 60px;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.prime {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.not-prime {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.error {
+  background-color: #f39c12;
+  color: white;
+}
