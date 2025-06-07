@@ -19,7 +19,7 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          cd backend
+          cd Backend
           npm install
           npm test
 
