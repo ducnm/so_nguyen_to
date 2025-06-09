@@ -1,9 +1,12 @@
-const cluster = require('cluster');
-const os = require('os');
 const express = require('express');
-const rateLimit = require('express-rate-limit');
-const numCPUs = os.cpus().length;
+const app = express();
 const PORT = 3000;
+
+// Middleware bảo mật
+app.use(helmet());
+
+// Middleware nén response
+app.use(compression());
 
 if (cluster.isMaster) {
   // Fork worker processes bằng số lượng CPU
@@ -31,30 +34,33 @@ if (cluster.isMaster) {
   });
   app.use(limiter);
 
-  // Hàm kiểm tra số nguyên tố
-  function isPrime(n) {
-    if (n <= 1) return false;
-    if (n <= 3) return true;
-    if (n % 2 === 0 || n % 3 === 0) return false;
-    for (let i = 5; i * i <= n; i += 6) {
-      if (n % i === 0 || n % (i + 2) === 0) return false;
-    }
-    return true;
+// Hàm kiểm tra số nguyên tố
+function isPrime(n) {
+  if (n <= 1) return false;
+  if (n <= 3) return true;
+  if (n % 2 === 0 || n % 3 === 0) return false;
+  
+  for (let i = 5; i * i <= n; i += 6) {
+    if (n % i === 0 || n % (i + 2) === 0) return false;
+  }
+  return true;
+}
+
+// API endpoint
+app.get('/check-prime', (req, res) => {
+  const number = parseInt(req.query.number);
+  
+  if (isNaN(number)) {
+    return res.status(400).json({
+      error: 'Vui lòng nhập số hợp lệ'
+    });
   }
 
-  // API endpoint
-  app.get('/check-prime', (req, res) => {
-    const number = parseInt(req.query.number);
-    if (isNaN(number)) {
-      return res.status(400).json({
-        error: 'Vui lòng nhập số hợp lệ'
-      });
-    }
-    res.json({
-      number,
-      isPrime: isPrime(Math.abs(number))
-    });
+  res.json({
+    number,
+    isPrime: isPrime(Math.abs(number))
   });
+});
 
   // Khởi động server
   app.listen(PORT, () => {
