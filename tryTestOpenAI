@@ -1,0 +1,65 @@
+import logging
+import os
+import requests
+import openai
+import azure.functions as func
+
+# Environment variables
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+OPENAI_DEPLOYMENT_NAME = os.environ["OPENAI_DEPLOYMENT_NAME"]
+OPENAI_ENDPOINT = os.environ["OPENAI_ENDPOINT"]
+OPENWEATHER_API_KEY = '7683708b48e1b4ca66a1a90aad6eac3ec'
+
+openai.api_key = '8Tr6ZnFLmcV9j0gOdiGMqlbOM9qJD5183T0gUVzkviFmlUMl0zUEJQQJ99BFACHYHv6XJ3w3AAAAACOGwSNn'
+openai.api_base = 'https://traveladvisoragent-2341-resource.services.ai.azure.com/models'
+openai.api_type = "azure"
+openai.api_version = "2023-07-01-preview"
+
+def get_weather(location):
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={OPENWEATHER_API_KEY}&units=metric&lang=vi"
+    response = requests.get(url)
+    if response.status_code != 200:
+        return None
+    data = response.json()
+    return {
+        "location": location,
+        "weather": data["weather"][0]["description"],
+        "temperature": data["main"]["temp"]
+    }
+
+def generate_travel_advice(weather_data):
+    system_prompt = (
+        "Bạn là một chuyên gia tư vấn du lịch tại Việt Nam. "
+        "Dựa vào thông tin thời tiết, hãy đưa ra lời khuyên phù hợp về nơi nên đi chơi, ăn uống hoặc tham quan, "
+        "kèm gợi ý trang phục nếu cần. Trả lời bằng tiếng Việt, ngắn gọn, thân thiện."
+    )
+
+    user_prompt = (
+        f"Địa điểm: {weather_data['location']}\n"
+        f"Thời tiết: {weather_data['weather']}\n"
+        f"Nhiệt độ: {weather_data['temperature']}°C\n\n"
+        f"Du khách nên đi đâu và làm gì hôm nay?"
+    )
+
+    response = openai.ChatCompletion.create(
+        engine=OPENAI_DEPLOYMENT_NAME,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        temperature=0.8,
+        max_tokens=500
+    )
+    return response["choices"][0]["message"]["content"]
+
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    location = req.params.get("location")
+    if not location:
+        return func.HttpResponse("Thiếu tham số 'location'", status_code=400)
+
+    weather_data = get_weather(location)
+    if not weather_data:
+        return func.HttpResponse("Không tìm thấy dữ liệu thời tiết cho địa điểm yêu cầu", status_code=404)
+
+    advice = generate_travel_advice(weather_data)
+    return func.HttpResponse(advice, status_code=200, mimetype="text/plain")
